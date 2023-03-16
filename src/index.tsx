@@ -1,13 +1,33 @@
-import React from 'react';
 import toast from 'react-hot-toast';
 import ReactDOM from 'react-dom/client';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import { QueryCache, QueryClient, QueryClientProvider } from 'react-query';
+import {
+  createTheme,
+  CssBaseline,
+  GlobalStyles,
+  ThemeProvider,
+} from '@mui/material';
 
-import Root, { rootLoader } from 'routes/root';
+import Root from 'routes/root';
+import Course, { courseLoader } from 'routes/course';
+import Courses, { coursesLoader } from 'routes/courses';
 
+const darkTheme = createTheme({
+  palette: {
+    mode: 'dark',
+  },
+});
+
+// - Додатково:
+// - при ховері відтворювати відео без звуку.
 // pagination in search
 // create styles files
+// mobile
+// no video placeholder
+// 2. Додати зміну швидкості програвання відео через клавіатуру (без сторонніх бібліотек) (комбінація клавіш на власний розсуд):
+// - Так же вивести інформацію біля відео як цим користуватись.
+// Title of course in header if back to list. rootLoader
 // TODO: style toast
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -36,7 +56,18 @@ const router = createBrowserRouter([
   {
     path: '/',
     element: <Root />,
-    loader: rootLoader(queryClient),
+    children: [
+      {
+        index: true,
+        element: <Courses />,
+        loader: coursesLoader(queryClient),
+      },
+      {
+        path: ':id',
+        element: <Course />,
+        loader: courseLoader(queryClient),
+      },
+    ],
   },
 ]);
 
@@ -44,9 +75,17 @@ const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
 );
 root.render(
-  <React.StrictMode>
-    <QueryClientProvider client={queryClient}>
+  <QueryClientProvider client={queryClient}>
+    <ThemeProvider theme={darkTheme}>
+      <CssBaseline />
+      <GlobalStyles
+        styles={{
+          html: { height: '100%' },
+          body: { height: 'inherit' },
+          '#root': { height: 'inherit' },
+        }}
+      />
       <RouterProvider router={router} />
-    </QueryClientProvider>
-  </React.StrictMode>
+    </ThemeProvider>
+  </QueryClientProvider>
 );
