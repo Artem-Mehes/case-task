@@ -1,22 +1,11 @@
-import { yellow } from '@mui/material/colors';
 import { useNavigate } from 'react-router-dom';
 import { QueryClient, useQuery } from 'react-query';
 import { useEffect, useMemo, useState } from 'react';
-import { Star, VideoLibrary } from '@mui/icons-material';
-import {
-  Box,
-  Chip,
-  Grid,
-  CardMedia,
-  Container,
-  Pagination,
-  Typography,
-  PaginationProps,
-} from '@mui/material';
+import { Grid, Container, Pagination, PaginationProps } from '@mui/material';
 
 import api from 'api';
 
-import * as Styles from './styles';
+import { Card } from './card';
 
 const coursesQuery = {
   queryKey: 'courses',
@@ -30,8 +19,6 @@ export const coursesLoader = (queryClient: QueryClient) => async () =>
 const itemsPerPage = 12;
 
 const Courses = () => {
-  const navigate = useNavigate();
-
   const [page, setPage] = useState(1);
 
   const { data } = useQuery({
@@ -57,6 +44,8 @@ const Courses = () => {
     window.scrollTo({ top: 0 });
   }, [items]);
 
+  console.log(items);
+
   return (
     <Container
       maxWidth="xl"
@@ -68,47 +57,16 @@ const Courses = () => {
         flexDirection: 'column',
       }}
     >
-      <Grid container spacing={5} columns={3} alignItems="stretch">
+      <Grid container spacing={5} columns={6} alignItems="stretch">
         {items?.map((course) => (
-          <Grid item md={3} lg={1} key={course.id} sx={{ display: 'flex' }}>
-            <Styles.Card onClick={() => navigate(course.id)}>
-              <CardMedia
-                height="300"
-                component="img"
-                title={course.title}
-                image={`${course.previewImageLink}/cover.webp`}
-              />
-              <Styles.CardContent>
-                <Box
-                  sx={{
-                    display: 'flex',
-                    alignItems: 'flex-start',
-                    justifyContent: 'space-between',
-                  }}
-                >
-                  <Typography variant="h5">{course.title}</Typography>
-
-                  <Box sx={{ display: 'flex', gap: 1, ml: 4 }}>
-                    <Star sx={{ color: yellow[500] }} />
-                    {course.rating}
-                  </Box>
-                </Box>
-                <Typography variant="body2" color="text.secondary">
-                  {course.description}
-                </Typography>
-
-                <Box sx={{ display: 'flex', gap: 1 }}>
-                  <VideoLibrary />
-                  {course.lessonsCount} lessons
-                </Box>
-
-                <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
-                  {course.meta.skills?.map((skill, index) => (
-                    <Chip key={index} size="small" label={skill} />
-                  ))}
-                </Box>
-              </Styles.CardContent>
-            </Styles.Card>
+          <Grid
+            item
+            md={3}
+            lg={2}
+            key={course.id}
+            sx={{ display: 'flex', width: '100%' }}
+          >
+            <Card data={course} />
           </Grid>
         ))}
       </Grid>

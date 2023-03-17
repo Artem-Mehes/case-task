@@ -4,14 +4,13 @@ import '@fontsource/roboto/500.css';
 import '@fontsource/roboto/700.css';
 import { Toaster } from 'react-hot-toast';
 import { LaptopMac } from '@mui/icons-material';
+import { useIsFetching, useQuery } from 'react-query';
 import {
   Outlet,
-  useLoaderData,
   useLocation,
   useNavigation,
   useParams,
 } from 'react-router-dom';
-import { useIsFetching, useQuery } from 'react-query';
 import { AppBar, Toolbar, Typography, Box, Divider } from '@mui/material';
 
 import { Loader } from 'icons';
@@ -19,21 +18,29 @@ import { Loader } from 'icons';
 import { courseQuery } from './course';
 
 const Root = () => {
-  const props = useLoaderData();
   const location = useLocation();
   const { id } = useParams();
   const isFetching = useIsFetching();
-  const { data, ...rest } = useQuery(courseQuery(id));
+  const { data } = useQuery(courseQuery(id));
 
   const navigation = useNavigation();
 
-  console.log(props);
+  console.log(location);
 
   return (
     <>
       <AppBar component="nav">
         <Toolbar sx={{ display: 'flex', gap: 4 }}>
-          <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+          <Box
+            sx={{
+              gap: 1,
+              alignItems: 'center',
+              display: {
+                md: 'flex',
+                xs: location.pathname === '/' ? 'flex' : 'none',
+              },
+            }}
+          >
             <LaptopMac />
             <Typography
               variant="h6"
@@ -45,9 +52,18 @@ const Root = () => {
             </Typography>
           </Box>
 
-          <Divider orientation="vertical" variant="middle" flexItem />
+          <Divider
+            flexItem
+            variant="middle"
+            orientation="vertical"
+            sx={{ display: { xs: 'none', md: 'flex' } }}
+          />
 
-          {data && <Typography variant="h6">{data.title}</Typography>}
+          {data && (
+            <Typography noWrap variant="h6">
+              {data.title}
+            </Typography>
+          )}
         </Toolbar>
       </AppBar>
 

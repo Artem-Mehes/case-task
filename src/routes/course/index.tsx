@@ -1,19 +1,17 @@
-import { Lock } from '@mui/icons-material';
 import BaseReactPlayer from 'react-player/base';
 import { QueryClient, useQuery } from 'react-query';
 import ReactPlayer, { ReactPlayerProps } from 'react-player';
-import { Fragment, useCallback, useMemo, useRef } from 'react';
 import { useParams, LoaderFunction, Params } from 'react-router-dom';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   Box,
-  List,
+  Tab,
   Chip,
-  AppBar,
+  Tabs,
   Divider,
-  ListItem,
+  useTheme,
   Typography,
-  ListItemText,
-  ListItemButton,
+  useMediaQuery,
 } from '@mui/material';
 
 import api from 'api';
@@ -21,7 +19,9 @@ import { secondsToHm } from 'utils';
 import { useLocalStorageById } from 'hooks';
 import { DescriptionList } from 'components';
 
-import { Progress } from './types';
+import * as Styles from './styles';
+import { Lessons } from './lessons';
+import { PlaybackRate, PlaybackRateOptions, Progress } from './types';
 
 export const courseQuery = (id: Params['id']) => ({
   enabled: Boolean(id),
@@ -40,11 +40,37 @@ export const courseLoader =
   };
 
 const Course = () => {
+  const theme = useTheme();
   const playerRef = useRef<BaseReactPlayer<ReactPlayerProps> | null>(null);
   const params = useParams();
   const { data } = useQuery(courseQuery(params.id));
+  const isLargeScreen = useMediaQuery(theme.breakpoints.up('lg'));
+
+  const [playbackRate, setPlaybackRate] = useState<PlaybackRate>(1);
+  const [tab, setTab] = useState<'content' | 'description'>('content');
 
   const { tags, meta, title, lessons, duration, description } = data ?? {};
+
+  useEffect(() => {
+    const listener = (e: KeyboardEvent) => {
+      if (e.shiftKey) {
+        const currentIndex = PlaybackRateOptions.indexOf(playbackRate);
+        if (e.key === '<') {
+          if (currentIndex === 0) return;
+          setPlaybackRate(PlaybackRateOptions[currentIndex - 1]);
+        } else if (e.key === '>') {
+          if (currentIndex === PlaybackRateOptions.length - 1) return;
+          setPlaybackRate(PlaybackRateOptions[currentIndex + 1]);
+        }
+      }
+    };
+
+    document.addEventListener('keydown', listener);
+
+    return () => {
+      document.removeEventListener('keydown', listener);
+    };
+  }, [playbackRate]);
 
   const sortedLessons = useMemo(
     () => lessons && [...lessons].sort((a, b) => a.order - b.order),
@@ -77,27 +103,20 @@ const Course = () => {
     ({ id }) => id === progress.active
   );
 
-  console.log('progress:', progress);
-
   return (
     <>
       <Box sx={{ display: 'flex' }}>
-        <Box
-          sx={{
-            gap: 2,
-            width: '75%',
-            display: 'flex',
-            flexDirection: 'column',
-          }}
-        >
+        <Styles.MainContent>
           <Box sx={{ position: 'relative', pt: '56.25%' }}>
             <ReactPlayer
+              // playing
               controls
               width="100%"
               height="100%"
               ref={playerRef}
               onReady={onReady}
               url={selectedLesson?.link}
+              playbackRate={playbackRate}
               style={{ position: 'absolute', top: 0, left: 0 }}
               onProgress={(videoProgress) =>
                 setProgress((prev) => ({
@@ -109,135 +128,123 @@ const Course = () => {
           </Box>
 
           <Box sx={{ p: 2, gap: 2, display: 'flex', flexDirection: 'column' }}>
-            <Typography variant="h5" sx={{ fontWeight: 'bold' }}>
-              About this course
-            </Typography>
-            <Box>
-              <Typography variant="h6">{title}</Typography>
-              <Typography>
-                Launched at{' '}
-                {data &&
-                  new Date(data.launchDate).toLocaleDateString('en-US', {
-                    month: 'long',
-                    year: 'numeric',
-                  })}
-              </Typography>
+            <Tabs
+              value={tab}
+              sx={{ display: { lg: 'none' } }}
+              onChange={(e, value) => setTab(value)}
+            >
+              <Tab label="Course content" value="content" />
+              <Tab label="Description" value="description" />
+            </Tabs>
+
+            <Box
+              sx={{
+                gap: 1,
+                display: 'flex',
+                alignSelf: 'end',
+                alignItems: 'center',
+              }}
+            >
+              Speed: <Styles.ShortcutButton>SHIFT</Styles.ShortcutButton> +{' '}
+              <Styles.ShortcutButton>{'<'}</Styles.ShortcutButton> /{' '}
+              <Styles.ShortcutButton>{'>'}</Styles.ShortcutButton>
             </Box>
 
-            <Divider />
+            {(tab === 'description' || isLargeScreen) && (
+              <>
+                <Typography variant="h5" sx={{ fontWeight: 'bold' }}>
+                  About this course
+                </Typography>
+                <Box>
+                  <Typography variant="h6">{title}</Typography>
+                  <Typography>
+                    Launched at{' '}
+                    {data &&
+                      new Date(data.launchDate).toLocaleDateString('en-US', {
+                        month: 'long',
+                        year: 'numeric',
+                      })}
+                  </Typography>
+                </Box>
 
-            <DescriptionList
-              items={[
-                {
-                  title: 'By the numbers',
-                  details: (
-                    <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-                      <span>
-                        Video:{' '}
-                        {duration &&
-                          secondsToHm(duration, {
-                            plural: true,
-                            type: 'biggest',
-                            label: {
-                              minutes: ' total minute',
-                              hours: ' total hour',
-                            },
-                          })}
-                      </span>
-                      <span>Lessons: {lessons?.length}</span>
-                    </Box>
-                  ),
-                },
-                {
-                  title: 'Description',
-                  details: description,
-                },
-                ...(meta?.skills
-                  ? [
-                      {
-                        title: 'Skills',
-                        details: (
-                          <>
-                            {meta.skills.map((skill, index) => (
-                              <Chip key={index} label={skill} />
-                            ))}
-                          </>
-                        ),
-                      },
-                    ]
-                  : []),
-                ...(tags
-                  ? [
-                      {
-                        title: 'Tags',
-                        details: (
-                          <>
-                            {tags.map((tag, index) => (
-                              <Chip key={index} label={tag} />
-                            ))}
-                          </>
-                        ),
-                      },
-                    ]
-                  : []),
-              ]}
-            />
+                <Divider />
+
+                <DescriptionList
+                  items={[
+                    {
+                      title: 'By the numbers',
+                      details: (
+                        <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+                          <span>
+                            Video:{' '}
+                            {duration &&
+                              secondsToHm(duration, {
+                                plural: true,
+                                type: 'biggest',
+                                label: {
+                                  minutes: ' total minute',
+                                  hours: ' total hour',
+                                },
+                              })}
+                          </span>
+                          <span>Lessons: {lessons?.length}</span>
+                        </Box>
+                      ),
+                    },
+                    {
+                      title: 'Description',
+                      details: description,
+                    },
+                    ...(meta?.skills
+                      ? [
+                          {
+                            title: 'Skills',
+                            details: (
+                              <>
+                                {meta.skills.map((skill, index) => (
+                                  <Chip key={index} label={skill} />
+                                ))}
+                              </>
+                            ),
+                          },
+                        ]
+                      : []),
+                    ...(tags
+                      ? [
+                          {
+                            title: 'Tags',
+                            details: (
+                              <>
+                                {tags.map((tag, index) => (
+                                  <Chip key={index} label={tag} />
+                                ))}
+                              </>
+                            ),
+                          },
+                        ]
+                      : []),
+                  ]}
+                />
+              </>
+            )}
+
+            {tab === 'content' && !isLargeScreen && (
+              <Lessons
+                progress={progress}
+                lessons={sortedLessons}
+                setProgress={setProgress}
+              />
+            )}
           </Box>
-        </Box>
+        </Styles.MainContent>
 
-        <Box
-          sx={{
-            right: 0,
-            zIndex: 1,
-            width: '25%',
-            display: 'flex',
-            position: 'fixed',
-            flexDirection: 'column',
-            height: `calc(100% - 64px)`,
-            backgroundColor: (theme) => theme.palette.background.default,
-          }}
-        >
-          <AppBar
-            position="static"
-            enableColorOnDark
-            sx={{ padding: 1, boxShadow: 'none' }}
-          >
-            <Typography sx={{ fontWeight: 'bold' }} variant="h5">
-              Course content
-            </Typography>
-          </AppBar>
-
-          <List sx={{ overflowY: 'auto', flex: 1 }}>
-            {sortedLessons?.map((lesson) => {
-              const isLocked = lesson.status === 'locked';
-
-              return (
-                <Fragment key={lesson.id}>
-                  <ListItem disablePadding>
-                    <ListItemButton
-                      disabled={isLocked}
-                      selected={progress.active === lesson.id}
-                      onClick={() =>
-                        setProgress((prev) => ({
-                          ...prev,
-                          active: lesson.id,
-                        }))
-                      }
-                    >
-                      <ListItemText
-                        secondary={secondsToHm(lesson.duration)}
-                        primary={`Lesson ${lesson.order}: ${lesson.title}`}
-                      />
-
-                      {isLocked && <Lock />}
-                    </ListItemButton>
-                  </ListItem>
-                  <Divider component="li" />
-                </Fragment>
-              );
-            })}
-          </List>
-        </Box>
+        <Styles.SidebarContainer>
+          <Lessons
+            progress={progress}
+            lessons={sortedLessons}
+            setProgress={setProgress}
+          />
+        </Styles.SidebarContainer>
       </Box>
     </>
   );

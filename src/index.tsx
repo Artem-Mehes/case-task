@@ -19,14 +19,12 @@ const darkTheme = createTheme({
   },
 });
 
-// - Додатково:
-// - при ховері відтворювати відео без звуку.
 // pagination in search
 // create styles files
-// mobile
 // no video placeholder
-// 2. Додати зміну швидкості програвання відео через клавіатуру (без сторонніх бібліотек) (комбінація клавіш на власний розсуд):
-// - Так же вивести інформацію біля відео як цим користуватись.
+// readme
+// Memory training simulator course - 404 on video
+// Show when speed changes
 // Title of course in header if back to list. rootLoader
 // TODO: style toast
 const queryClient = new QueryClient({
