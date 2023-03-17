@@ -2,7 +2,7 @@ import BaseReactPlayer from 'react-player/base';
 import { QueryClient, useQuery } from 'react-query';
 import ReactPlayer, { ReactPlayerProps } from 'react-player';
 import { useParams, LoaderFunction, Params } from 'react-router-dom';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   Box,
   Tab,
@@ -45,9 +45,11 @@ const Course = () => {
   const params = useParams();
   const { data } = useQuery(courseQuery(params.id));
   const isLargeScreen = useMediaQuery(theme.breakpoints.up('lg'));
+  const didInit = useRef(false);
 
   const [playbackRate, setPlaybackRate] = useState<PlaybackRate>(1);
   const [tab, setTab] = useState<'content' | 'description'>('content');
+  const [showPlaybackRate, setShowPlaybackRate] = useState(false);
 
   const { tags, meta, title, lessons, duration, description } = data ?? {};
 
@@ -72,6 +74,21 @@ const Course = () => {
     };
   }, [playbackRate]);
 
+  useEffect(() => {
+    let intervalId: NodeJS.Timer;
+
+    if (didInit.current) {
+      setShowPlaybackRate(true);
+      intervalId = setInterval(() => setShowPlaybackRate(false), 1000);
+    }
+
+    didInit.current = true;
+
+    return () => {
+      if (intervalId) clearInterval(intervalId);
+    };
+  }, [playbackRate]);
+
   const sortedLessons = useMemo(
     () => lessons && [...lessons].sort((a, b) => a.order - b.order),
     [lessons]
@@ -93,11 +110,11 @@ const Course = () => {
 
   const played = progress[progress.active];
 
-  const onReady = useCallback(() => {
+  const onReady = () => {
     if (played && playerRef.current) {
       playerRef.current.seekTo(Number(played), 'seconds');
     }
-  }, [progress.active]);
+  };
 
   const selectedLesson = data?.lessons?.find(
     ({ id }) => id === progress.active
@@ -107,9 +124,12 @@ const Course = () => {
     <>
       <Box sx={{ display: 'flex' }}>
         <Styles.MainContent>
-          <Box sx={{ position: 'relative', pt: '56.25%' }}>
+          <Styles.PlayerContainer
+            playbackRate={playbackRate}
+            showPlaybackRate={showPlaybackRate}
+          >
             <ReactPlayer
-              // playing
+              playing
               controls
               width="100%"
               height="100%"
@@ -125,7 +145,7 @@ const Course = () => {
                 }))
               }
             />
-          </Box>
+          </Styles.PlayerContainer>
 
           <Box sx={{ p: 2, gap: 2, display: 'flex', flexDirection: 'column' }}>
             <Tabs

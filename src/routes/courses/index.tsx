@@ -1,6 +1,5 @@
-import { useNavigate } from 'react-router-dom';
+import { useMemo, useState } from 'react';
 import { QueryClient, useQuery } from 'react-query';
-import { useEffect, useMemo, useState } from 'react';
 import { Grid, Container, Pagination, PaginationProps } from '@mui/material';
 
 import api from 'api';
@@ -26,8 +25,10 @@ const Courses = () => {
     select: (queryData) => queryData.courses,
   });
 
-  const onPageChange: PaginationProps['onChange'] = (e, value) =>
+  const onPageChange: PaginationProps['onChange'] = (e, value) => {
     setPage(value);
+    window.scrollTo({ top: 0 });
+  };
 
   const pageCount = data && Math.ceil(data.length / itemsPerPage);
 
@@ -39,12 +40,6 @@ const Courses = () => {
       return data.slice(begin, end);
     }
   }, [page, data]);
-
-  useEffect(() => {
-    window.scrollTo({ top: 0 });
-  }, [items]);
-
-  console.log(items);
 
   return (
     <Container

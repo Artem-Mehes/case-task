@@ -24,8 +24,7 @@ const darkTheme = createTheme({
 // no video placeholder
 // readme
 // Memory training simulator course - 404 on video
-// Show when speed changes
-// Title of course in header if back to list. rootLoader
+//  How to Stop Procrastinating no video
 // TODO: style toast
 const queryClient = new QueryClient({
   defaultOptions: {
