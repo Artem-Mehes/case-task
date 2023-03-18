@@ -8,7 +8,10 @@ export const ShortcutButton = styled('span')(({ theme }) => ({
   padding: '2px 8px',
   borderRadius: '4px',
   color: theme.palette.common.black,
-  backgroundColor: theme.palette.grey['500'],
+  backgroundColor:
+    theme.palette.mode === 'light'
+      ? theme.palette.grey['300']
+      : theme.palette.grey['500'],
 }));
 
 export const SidebarContainer = styled(Box)(({ theme }) => ({

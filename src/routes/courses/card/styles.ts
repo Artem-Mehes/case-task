@@ -18,7 +18,10 @@ export const Card = styled(MuiCard)(({ theme }) => ({
     transition: 'transform 0.15s ease-in-out',
     ':hover': {
       transform: 'scale3d(1.05, 1.05, 1)',
-      backgroundColor: theme.palette.grey['900'],
+      backgroundColor:
+        theme.palette.mode === 'light'
+          ? theme.palette.grey['300']
+          : theme.palette.grey['900'],
     },
   },
 }));

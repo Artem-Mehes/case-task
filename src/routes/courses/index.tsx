@@ -1,8 +1,9 @@
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { QueryClient, useQuery } from 'react-query';
 import { Grid, Container, Pagination, PaginationProps } from '@mui/material';
 
 import api from 'api';
+import { useTitle, useSearchParams } from 'hooks';
 
 import { Card } from './card';
 
@@ -18,7 +19,9 @@ export const coursesLoader = (queryClient: QueryClient) => async () =>
 const itemsPerPage = 12;
 
 const Courses = () => {
-  const [page, setPage] = useState(1);
+  useTitle('Courses');
+
+  const [page, setPage] = useSearchParams('page', '1');
 
   const { data } = useQuery({
     ...coursesQuery,
@@ -26,7 +29,7 @@ const Courses = () => {
   });
 
   const onPageChange: PaginationProps['onChange'] = (e, value) => {
-    setPage(value);
+    setPage(String(value));
     window.scrollTo({ top: 0 });
   };
 
@@ -34,7 +37,7 @@ const Courses = () => {
 
   const items = useMemo(() => {
     if (data) {
-      const begin = (page - 1) * itemsPerPage;
+      const begin = (+page - 1) * itemsPerPage;
       const end = begin + itemsPerPage;
 
       return data.slice(begin, end);
@@ -68,9 +71,9 @@ const Courses = () => {
 
       {items && (
         <Pagination
-          page={page}
-          count={pageCount}
+          page={+page}
           shape="rounded"
+          count={pageCount}
           variant="outlined"
           onChange={onPageChange}
         />

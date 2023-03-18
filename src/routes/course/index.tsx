@@ -16,12 +16,13 @@ import {
 
 import api from 'api';
 import { secondsToHm } from 'utils';
-import { useLocalStorageById } from 'hooks';
 import { DescriptionList } from 'components';
+import { useLocalStorageById, useTitle } from 'hooks';
 
 import * as Styles from './styles';
 import { Lessons } from './lessons';
 import { PlaybackRate, PlaybackRateOptions, Progress } from './types';
+import { Error } from '@mui/icons-material';
 
 export const courseQuery = (id: Params['id']) => ({
   enabled: Boolean(id),
@@ -46,6 +47,7 @@ const Course = () => {
   const { data } = useQuery(courseQuery(params.id));
   const isLargeScreen = useMediaQuery(theme.breakpoints.up('lg'));
   const didInit = useRef(false);
+  useTitle('Course', data?.title);
 
   const [playbackRate, setPlaybackRate] = useState<PlaybackRate>(1);
   const [tab, setTab] = useState<'content' | 'description'>('content');
@@ -124,28 +126,48 @@ const Course = () => {
     <>
       <Box sx={{ display: 'flex' }}>
         <Styles.MainContent>
-          <Styles.PlayerContainer
-            playbackRate={playbackRate}
-            showPlaybackRate={showPlaybackRate}
-          >
-            <ReactPlayer
-              playing
-              controls
-              width="100%"
-              height="100%"
-              ref={playerRef}
-              onReady={onReady}
-              url={selectedLesson?.link}
+          {selectedLesson?.link ? (
+            <Styles.PlayerContainer
               playbackRate={playbackRate}
-              style={{ position: 'absolute', top: 0, left: 0 }}
-              onProgress={(videoProgress) =>
-                setProgress((prev) => ({
-                  ...prev,
-                  [progress.active]: videoProgress.playedSeconds,
-                }))
-              }
-            />
-          </Styles.PlayerContainer>
+              showPlaybackRate={showPlaybackRate}
+            >
+              <ReactPlayer
+                playing
+                controls
+                width="100%"
+                height="100%"
+                ref={playerRef}
+                onReady={onReady}
+                url={selectedLesson?.link}
+                playbackRate={playbackRate}
+                light={`${data?.previewImageLink}/cover.webp`}
+                style={{ position: 'absolute', top: 0, left: 0 }}
+                onProgress={(videoProgress) =>
+                  setProgress((prev) => ({
+                    ...prev,
+                    [progress.active]: videoProgress.playedSeconds,
+                  }))
+                }
+              />
+            </Styles.PlayerContainer>
+          ) : (
+            <Box
+              sx={{
+                p: 1,
+                gap: 3,
+                width: '100%',
+                height: '600px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              <Error sx={{ width: '48px', height: '48px' }} />
+              <Typography variant="h3">
+                Sorry, no video found for this lesson
+              </Typography>
+            </Box>
+          )}
 
           <Box sx={{ p: 2, gap: 2, display: 'flex', flexDirection: 'column' }}>
             <Tabs

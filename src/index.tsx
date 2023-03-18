@@ -2,29 +2,14 @@ import toast from 'react-hot-toast';
 import ReactDOM from 'react-dom/client';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import { QueryCache, QueryClient, QueryClientProvider } from 'react-query';
-import {
-  createTheme,
-  CssBaseline,
-  GlobalStyles,
-  ThemeProvider,
-} from '@mui/material';
 
 import Root from 'routes/root';
 import Course, { courseLoader } from 'routes/course';
 import Courses, { coursesLoader } from 'routes/courses';
 
-const darkTheme = createTheme({
-  palette: {
-    mode: 'dark',
-  },
-});
-
-// pagination in search
 // create styles files
-// no video placeholder
 // readme
-// Memory training simulator course - 404 on video
-//  How to Stop Procrastinating no video
+// Flex
 // TODO: style toast
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -73,16 +58,6 @@ const root = ReactDOM.createRoot(
 );
 root.render(
   <QueryClientProvider client={queryClient}>
-    <ThemeProvider theme={darkTheme}>
-      <CssBaseline />
-      <GlobalStyles
-        styles={{
-          html: { height: '100%' },
-          body: { height: 'inherit' },
-          '#root': { height: 'inherit' },
-        }}
-      />
-      <RouterProvider router={router} />
-    </ThemeProvider>
+    <RouterProvider router={router} />
   </QueryClientProvider>
 );
