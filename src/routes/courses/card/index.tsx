@@ -1,10 +1,9 @@
-import { MouseEventHandler, useState } from 'react';
 import ReactPlayer from 'react-player';
 import { yellow } from '@mui/material/colors';
 import { useNavigate } from 'react-router-dom';
 import { Star, VideoLibrary } from '@mui/icons-material';
+import { MouseEventHandler, useEffect, useState } from 'react';
 import {
-  Box,
   Chip,
   useTheme,
   CardMedia,
@@ -12,6 +11,7 @@ import {
   useMediaQuery,
 } from '@mui/material';
 
+import { Flex } from 'components';
 import { PreviewCourse } from 'api/courses';
 
 import * as Styles from './styles';
@@ -24,6 +24,8 @@ export const Card = ({ data }: { data: PreviewCourse }) => {
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const [hasVideoRequestError, setVideoRequestError] = useState(false);
   const [showAllSkills, setShowAllSkills] = useState(!isMobile);
+
+  useEffect(() => setShowAllSkills(!isMobile), [isMobile]);
 
   const [hovered, setHovered] = useState(false);
 
@@ -51,10 +53,9 @@ export const Card = ({ data }: { data: PreviewCourse }) => {
       onMouseLeave={() => setHovered(false)}
     >
       {hovered && videoIsOk ? (
-        <Box
+        <Flex
+          justifyContent="center"
           sx={{
-            display: 'flex',
-            justifyContent: 'center',
             video: {
               objectFit: 'cover',
             },
@@ -71,7 +72,7 @@ export const Card = ({ data }: { data: PreviewCourse }) => {
               if (!hasVideoRequestError) setVideoRequestError(true);
             }}
           />
-        </Box>
+        </Flex>
       ) : (
         <CardMedia
           height="300"
@@ -85,21 +86,21 @@ export const Card = ({ data }: { data: PreviewCourse }) => {
         <Styles.CardTitleContainer>
           <Typography variant="h5">{data.title}</Typography>
 
-          <Box sx={{ display: 'flex', gap: 1 }}>
+          <Flex gap={1}>
             <Star sx={{ color: yellow[500] }} />
             {data.rating}
-          </Box>
+          </Flex>
         </Styles.CardTitleContainer>
         <Typography variant="body2" color="text.secondary">
           {data.description}
         </Typography>
 
-        <Box sx={{ display: 'flex', gap: 1 }}>
+        <Flex gap={1}>
           <VideoLibrary />
           {data.lessonsCount} lessons
-        </Box>
+        </Flex>
 
-        <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+        <Flex gap={1} flexWrap="wrap">
           {skills?.map((skill, index) => (
             <Chip
               key={index}
@@ -117,7 +118,7 @@ export const Card = ({ data }: { data: PreviewCourse }) => {
               onClick={onShowMoreSkillsClick}
             />
           )}
-        </Box>
+        </Flex>
       </Styles.CardContent>
     </Styles.Card>
   );

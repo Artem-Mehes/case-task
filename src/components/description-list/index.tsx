@@ -1,9 +1,14 @@
 import { Fragment } from 'react';
-import { Box, Divider } from '@mui/material';
+import { Box, Divider, useMediaQuery, useTheme } from '@mui/material';
+
+import { Flex } from 'components';
 
 import { DescriptionListProps } from './types';
 
 export const DescriptionList = ({ items }: DescriptionListProps) => {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+
   return (
     <Box
       component="dl"
@@ -11,18 +16,15 @@ export const DescriptionList = ({ items }: DescriptionListProps) => {
     >
       {items.map((item, index) => (
         <Fragment key={index}>
-          <Box sx={{ display: 'flex' }}>
-            <Box component="dt" sx={{ flexBasis: '20%', flexShrink: 0 }}>
+          <Flex gap={2} column={isMobile}>
+            <Box component="dt" sx={{ flex: '0 0 20%' }}>
               {item.title}
             </Box>
 
-            <Box
-              component="dd"
-              sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', m: 0 }}
-            >
+            <Flex gap={1} component="dd" flexWrap="wrap" sx={{ m: 0 }}>
               {item.details}
-            </Box>
-          </Box>
+            </Flex>
+          </Flex>
 
           <Divider />
         </Fragment>

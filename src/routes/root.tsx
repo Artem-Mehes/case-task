@@ -4,7 +4,7 @@ import '@fontsource/roboto/500.css';
 import '@fontsource/roboto/700.css';
 import { useMemo, useState } from 'react';
 import { Toaster } from 'react-hot-toast';
-import { useIsFetching, useQuery } from 'react-query';
+import { useIsFetching, useQuery } from '@tanstack/react-query';
 import { LaptopMac, Brightness4, Brightness7 } from '@mui/icons-material';
 import {
   Outlet,
@@ -13,7 +13,6 @@ import {
   useNavigation,
 } from 'react-router-dom';
 import {
-  Box,
   AppBar,
   Button,
   Toolbar,
@@ -27,8 +26,10 @@ import {
 } from '@mui/material';
 
 import { Loader } from 'icons';
+import { Flex } from 'components';
 
 import { courseQuery } from './course';
+import { getGlobalStyles } from './utils';
 
 const Root = () => {
   const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)');
@@ -52,53 +53,22 @@ const Root = () => {
     [mode]
   );
 
+  const globalStyles = useMemo(() => getGlobalStyles(theme), [theme]);
+
   const toggleColorMode = () =>
     setMode((prev) => (prev === 'light' ? 'dark' : 'light'));
 
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <GlobalStyles
-        styles={{
-          html: { height: '100%' },
-          body: { height: 'inherit' },
-          '#root': { height: 'inherit' },
-          '::-webkit-scrollbar': {
-            width: '7px',
-          },
-          '::-webkit-scrollbar-track': {
-            background:
-              mode === 'dark'
-                ? theme.palette.grey['900']
-                : theme.palette.grey['200'],
-          },
-          '::-webkit-scrollbar-thumb': {
-            borderRadius: '4px',
-            backgroundColor:
-              mode === 'dark'
-                ? theme.palette.grey['600']
-                : theme.palette.grey['300'],
-            border: `1px solid ${
-              mode === 'dark'
-                ? theme.palette.grey['800']
-                : theme.palette.grey['400']
-            }`,
-            ':hover': {
-              backgroundColor:
-                mode === 'dark'
-                  ? theme.palette.grey['500']
-                  : theme.palette.grey['400'],
-            },
-          },
-        }}
-      />
+      <GlobalStyles styles={globalStyles} />
 
       <AppBar component="nav">
         <Toolbar sx={{ display: 'flex', gap: 4 }}>
-          <Box
+          <Flex
+            gap={1}
+            alignItems="center"
             sx={{
-              gap: 1,
-              alignItems: 'center',
               display: {
                 md: 'flex',
                 xs: location.pathname === '/' ? 'flex' : 'none',
@@ -114,7 +84,7 @@ const Root = () => {
             >
               Courses app
             </Typography>
-          </Box>
+          </Flex>
 
           <Divider
             flexItem
@@ -143,9 +113,9 @@ const Root = () => {
       </AppBar>
 
       {isFetching || navigation.state === 'loading' ? (
-        <Box sx={{ display: 'flex', alignItems: 'center', height: 'inherit' }}>
+        <Flex alignItems="center" sx={{ height: 'inherit' }}>
           <Loader />
-        </Box>
+        </Flex>
       ) : (
         <>
           <Toolbar />

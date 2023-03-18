@@ -1,14 +1,16 @@
 import { useMemo } from 'react';
-import { QueryClient, useQuery } from 'react-query';
+import { useLoaderData } from 'react-router-dom';
+import { QueryClient, useQuery } from '@tanstack/react-query';
 import { Grid, Container, Pagination, PaginationProps } from '@mui/material';
 
 import api from 'api';
+import { PreviewCourse } from 'api/courses';
 import { useTitle, useSearchParams } from 'hooks';
 
 import { Card } from './card';
 
 const coursesQuery = {
-  queryKey: 'courses',
+  queryKey: ['courses'],
   queryFn: api.courses.getAll,
 };
 
@@ -19,12 +21,16 @@ export const coursesLoader = (queryClient: QueryClient) => async () =>
 const itemsPerPage = 12;
 
 const Courses = () => {
+  // TODO
+  const initialData = useLoaderData() as { courses: PreviewCourse[] };
+
   useTitle('Courses');
 
   const [page, setPage] = useSearchParams('page', '1');
 
   const { data } = useQuery({
     ...coursesQuery,
+    initialData,
     select: (queryData) => queryData.courses,
   });
 
@@ -33,15 +39,13 @@ const Courses = () => {
     window.scrollTo({ top: 0 });
   };
 
-  const pageCount = data && Math.ceil(data.length / itemsPerPage);
+  const pageCount = Math.ceil(data.length / itemsPerPage);
 
   const items = useMemo(() => {
-    if (data) {
-      const begin = (+page - 1) * itemsPerPage;
-      const end = begin + itemsPerPage;
+    const begin = (+page - 1) * itemsPerPage;
+    const end = begin + itemsPerPage;
 
-      return data.slice(begin, end);
-    }
+    return data.slice(begin, end);
   }, [page, data]);
 
   return (
@@ -56,7 +60,7 @@ const Courses = () => {
       }}
     >
       <Grid container spacing={5} columns={6} alignItems="stretch">
-        {items?.map((course) => (
+        {items.map((course) => (
           <Grid
             item
             md={3}

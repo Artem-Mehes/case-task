@@ -1,16 +1,20 @@
 import toast from 'react-hot-toast';
 import ReactDOM from 'react-dom/client';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
-import { QueryCache, QueryClient, QueryClientProvider } from 'react-query';
+import {
+  QueryCache,
+  QueryClient,
+  QueryClientProvider,
+} from '@tanstack/react-query';
 
 import Root from 'routes/root';
 import Course, { courseLoader } from 'routes/course';
 import Courses, { coursesLoader } from 'routes/courses';
 
 // create styles files
-// readme
-// Flex
 // TODO: style toast
+// router error page
+// useLoaderData
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -38,6 +42,7 @@ const router = createBrowserRouter([
   {
     path: '/',
     element: <Root />,
+    errorElement: <>Error</>,
     children: [
       {
         index: true,

@@ -1,10 +1,15 @@
+import { Error } from '@mui/icons-material';
 import BaseReactPlayer from 'react-player/base';
-import { QueryClient, useQuery } from 'react-query';
 import ReactPlayer, { ReactPlayerProps } from 'react-player';
-import { useParams, LoaderFunction, Params } from 'react-router-dom';
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { QueryClient, useQuery } from '@tanstack/react-query';
 import {
-  Box,
+  Params,
+  useParams,
+  useLoaderData,
+  LoaderFunction,
+} from 'react-router-dom';
+import {
   Tab,
   Chip,
   Tabs,
@@ -16,13 +21,13 @@ import {
 
 import api from 'api';
 import { secondsToHm } from 'utils';
-import { DescriptionList } from 'components';
+import { Course as ICourse } from 'api/courses';
+import { DescriptionList, Flex } from 'components';
 import { useLocalStorageById, useTitle } from 'hooks';
 
 import * as Styles from './styles';
 import { Lessons } from './lessons';
 import { PlaybackRate, PlaybackRateOptions, Progress } from './types';
-import { Error } from '@mui/icons-material';
 
 export const courseQuery = (id: Params['id']) => ({
   enabled: Boolean(id),
@@ -41,19 +46,24 @@ export const courseLoader =
   };
 
 const Course = () => {
+  // TODO
+  const initialData = useLoaderData() as ICourse;
   const theme = useTheme();
   const playerRef = useRef<BaseReactPlayer<ReactPlayerProps> | null>(null);
   const params = useParams();
-  const { data } = useQuery(courseQuery(params.id));
+  const { data } = useQuery({
+    ...courseQuery(params.id),
+    initialData,
+  });
   const isLargeScreen = useMediaQuery(theme.breakpoints.up('lg'));
   const didInit = useRef(false);
-  useTitle('Course', data?.title);
+  useTitle('Course', data.title);
 
   const [playbackRate, setPlaybackRate] = useState<PlaybackRate>(1);
   const [tab, setTab] = useState<'content' | 'description'>('content');
   const [showPlaybackRate, setShowPlaybackRate] = useState(false);
 
-  const { tags, meta, title, lessons, duration, description } = data ?? {};
+  const { tags, meta, title, lessons, duration, description } = data;
 
   useEffect(() => {
     const listener = (e: KeyboardEvent) => {
@@ -92,11 +102,11 @@ const Course = () => {
   }, [playbackRate]);
 
   const sortedLessons = useMemo(
-    () => lessons && [...lessons].sort((a, b) => a.order - b.order),
+    () => [...lessons].sort((a, b) => a.order - b.order),
     [lessons]
   );
 
-  const firstLessonId = sortedLessons?.[0].id;
+  const firstLessonId = sortedLessons[0].id;
 
   const [progress, setProgress] = useLocalStorageById<Progress>(
     {
@@ -106,7 +116,7 @@ const Course = () => {
     params.id!,
     {
       name: 'progress',
-      skip: !sortedLessons?.[0].id || !params.id,
+      skip: !sortedLessons[0].id || !params.id,
     }
   );
 
@@ -118,13 +128,11 @@ const Course = () => {
     }
   };
 
-  const selectedLesson = data?.lessons?.find(
-    ({ id }) => id === progress.active
-  );
+  const selectedLesson = data.lessons.find(({ id }) => id === progress.active);
 
   return (
     <>
-      <Box sx={{ display: 'flex' }}>
+      <Flex>
         <Styles.MainContent>
           {selectedLesson?.link ? (
             <Styles.PlayerContainer
@@ -138,9 +146,9 @@ const Course = () => {
                 height="100%"
                 ref={playerRef}
                 onReady={onReady}
-                url={selectedLesson?.link}
+                url={selectedLesson.link}
                 playbackRate={playbackRate}
-                light={`${data?.previewImageLink}/cover.webp`}
+                light={`${data.previewImageLink}/cover.webp`}
                 style={{ position: 'absolute', top: 0, left: 0 }}
                 onProgress={(videoProgress) =>
                   setProgress((prev) => ({
@@ -151,25 +159,23 @@ const Course = () => {
               />
             </Styles.PlayerContainer>
           ) : (
-            <Box
+            <Flex
+              center
+              gap={3}
               sx={{
                 p: 1,
-                gap: 3,
                 width: '100%',
                 height: '600px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
               }}
             >
               <Error sx={{ width: '48px', height: '48px' }} />
               <Typography variant="h3">
                 Sorry, no video found for this lesson
               </Typography>
-            </Box>
+            </Flex>
           )}
 
-          <Box sx={{ p: 2, gap: 2, display: 'flex', flexDirection: 'column' }}>
+          <Flex column gap={2} sx={{ p: 2 }}>
             <Tabs
               value={tab}
               sx={{ display: { lg: 'none' } }}
@@ -179,25 +185,18 @@ const Course = () => {
               <Tab label="Description" value="description" />
             </Tabs>
 
-            <Box
-              sx={{
-                gap: 1,
-                display: 'flex',
-                alignSelf: 'end',
-                alignItems: 'center',
-              }}
-            >
+            <Flex gap={1} alignSelf="end" alignItems="center">
               Speed: <Styles.ShortcutButton>SHIFT</Styles.ShortcutButton> +{' '}
               <Styles.ShortcutButton>{'<'}</Styles.ShortcutButton> /{' '}
               <Styles.ShortcutButton>{'>'}</Styles.ShortcutButton>
-            </Box>
+            </Flex>
 
             {(tab === 'description' || isLargeScreen) && (
               <>
                 <Typography variant="h5" sx={{ fontWeight: 'bold' }}>
                   About this course
                 </Typography>
-                <Box>
+                <div>
                   <Typography variant="h6">{title}</Typography>
                   <Typography>
                     Launched at{' '}
@@ -207,7 +206,7 @@ const Course = () => {
                         year: 'numeric',
                       })}
                   </Typography>
-                </Box>
+                </div>
 
                 <Divider />
 
@@ -216,7 +215,7 @@ const Course = () => {
                     {
                       title: 'By the numbers',
                       details: (
-                        <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+                        <Flex column>
                           <span>
                             Video:{' '}
                             {duration &&
@@ -229,15 +228,15 @@ const Course = () => {
                                 },
                               })}
                           </span>
-                          <span>Lessons: {lessons?.length}</span>
-                        </Box>
+                          <span>Lessons: {lessons.length}</span>
+                        </Flex>
                       ),
                     },
                     {
                       title: 'Description',
                       details: description,
                     },
-                    ...(meta?.skills
+                    ...(meta.skills
                       ? [
                           {
                             title: 'Skills',
@@ -277,7 +276,7 @@ const Course = () => {
                 setProgress={setProgress}
               />
             )}
-          </Box>
+          </Flex>
         </Styles.MainContent>
 
         <Styles.SidebarContainer>
@@ -287,7 +286,7 @@ const Course = () => {
             setProgress={setProgress}
           />
         </Styles.SidebarContainer>
-      </Box>
+      </Flex>
     </>
   );
 };
