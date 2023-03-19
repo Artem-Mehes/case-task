@@ -12,6 +12,7 @@ export const Flex = ({
   center,
   children,
   component,
+  className,
   ...props
 }: PropsWithChildren<FlexProps>) => {
   const resultSx: SxProps<Theme> = {
@@ -26,7 +27,7 @@ export const Flex = ({
   };
 
   return (
-    <Box component={component} sx={resultSx}>
+    <Box component={component} sx={resultSx} className={className}>
       {children}
     </Box>
   );

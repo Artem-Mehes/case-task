@@ -1,3 +1,5 @@
+import { Theme } from '@mui/material';
+
 export const getPlural = (number: number, label: string) =>
   number === 1 ? label : `${label}s`;
 
@@ -30,3 +32,35 @@ export const secondsToHm = (
     return displayHours || displayMinutes;
   }
 };
+
+export const getGlobalStyles = (theme: Theme) => ({
+  html: { height: '100%' },
+  body: { height: 'inherit', margin: 0 },
+  '#root': { height: 'inherit' },
+  '::-webkit-scrollbar': {
+    width: '8px',
+  },
+  '::-webkit-scrollbar-track': {
+    background:
+      theme.palette.mode === 'dark'
+        ? theme.palette.grey['900']
+        : theme.palette.grey['200'],
+  },
+  '::-webkit-scrollbar-thumb': {
+    borderRadius: '4px',
+    backgroundColor:
+      theme.palette.mode === 'dark'
+        ? theme.palette.grey['600']
+        : theme.palette.grey['400'],
+    border: `1px solid ${
+      theme.palette.mode === 'dark'
+        ? theme.palette.grey['800']
+        : theme.palette.grey['500']
+    }`,
+    ':hover': {
+      backgroundColor: theme.palette.grey['500'],
+    },
+  },
+});
+
+export const getCoverUrl = (src: string) => `${src}/cover.webp`;

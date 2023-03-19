@@ -1,28 +1,31 @@
 import { useMemo } from 'react';
 import { useLoaderData } from 'react-router-dom';
 import { QueryClient, useQuery } from '@tanstack/react-query';
-import { Grid, Container, Pagination, PaginationProps } from '@mui/material';
+import { Grid, Pagination, PaginationProps } from '@mui/material';
 
 import api from 'api';
-import { PreviewCourse } from 'api/courses';
 import { useTitle, useSearchParams } from 'hooks';
 
 import { Card } from './card';
+import * as Styles from './styles';
 
 const coursesQuery = {
   queryKey: ['courses'],
   queryFn: api.courses.getAll,
 };
 
-export const coursesLoader = (queryClient: QueryClient) => async () =>
-  queryClient.getQueryData(coursesQuery.queryKey) ??
-  (await queryClient.fetchQuery(coursesQuery));
+export const coursesLoader =
+  (queryClient: QueryClient): (() => ReturnType<typeof coursesQuery.queryFn>) =>
+  async () =>
+    queryClient.getQueryData(coursesQuery.queryKey) ??
+    (await queryClient.fetchQuery(coursesQuery));
 
 const itemsPerPage = 12;
 
 const Courses = () => {
-  // TODO
-  const initialData = useLoaderData() as { courses: PreviewCourse[] };
+  const initialData = useLoaderData() as Awaited<
+    ReturnType<ReturnType<typeof coursesLoader>>
+  >;
 
   useTitle('Courses');
 
@@ -49,16 +52,7 @@ const Courses = () => {
   }, [page, data]);
 
   return (
-    <Container
-      maxWidth="xl"
-      sx={{
-        gap: 3,
-        paddingY: 5,
-        display: 'flex',
-        alignItems: 'center',
-        flexDirection: 'column',
-      }}
-    >
+    <Styles.CoursesContainer maxWidth="xl">
       <Grid container spacing={5} columns={6} alignItems="stretch">
         {items.map((course) => (
           <Grid
@@ -82,7 +76,7 @@ const Courses = () => {
           onChange={onPageChange}
         />
       )}
-    </Container>
+    </Styles.CoursesContainer>
   );
 };
 

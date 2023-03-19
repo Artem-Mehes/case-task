@@ -6,6 +6,7 @@ export interface FlexProps {
   gap?: number;
   column?: boolean;
   center?: boolean;
+  className?: string;
   sx?: SxProps<Theme>;
   flex?: number | string;
   component?: ElementType;

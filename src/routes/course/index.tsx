@@ -1,14 +1,10 @@
 import { Error } from '@mui/icons-material';
 import BaseReactPlayer from 'react-player/base';
-import ReactPlayer, { ReactPlayerProps } from 'react-player';
+import { ReactPlayerProps } from 'react-player';
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { LoaderFunctionArgs } from '@remix-run/router/utils';
 import { QueryClient, useQuery } from '@tanstack/react-query';
-import {
-  Params,
-  useParams,
-  useLoaderData,
-  LoaderFunction,
-} from 'react-router-dom';
+import { Params, useParams, useLoaderData } from 'react-router-dom';
 import {
   Tab,
   Chip,
@@ -20,8 +16,7 @@ import {
 } from '@mui/material';
 
 import api from 'api';
-import { secondsToHm } from 'utils';
-import { Course as ICourse } from 'api/courses';
+import { getCoverUrl, secondsToHm } from 'utils';
 import { DescriptionList, Flex } from 'components';
 import { useLocalStorageById, useTitle } from 'hooks';
 
@@ -36,7 +31,11 @@ export const courseQuery = (id: Params['id']) => ({
 });
 
 export const courseLoader =
-  (queryClient: QueryClient): LoaderFunction =>
+  (
+    queryClient: QueryClient
+  ): ((
+    args: LoaderFunctionArgs
+  ) => ReturnType<ReturnType<typeof courseQuery>['queryFn']>) =>
   async ({ params }) => {
     const query = courseQuery(params.id);
     return (
@@ -46,8 +45,9 @@ export const courseLoader =
   };
 
 const Course = () => {
-  // TODO
-  const initialData = useLoaderData() as ICourse;
+  const initialData = useLoaderData() as Awaited<
+    ReturnType<ReturnType<typeof courseLoader>>
+  >;
   const theme = useTheme();
   const playerRef = useRef<BaseReactPlayer<ReactPlayerProps> | null>(null);
   const params = useParams();
@@ -57,13 +57,23 @@ const Course = () => {
   });
   const isLargeScreen = useMediaQuery(theme.breakpoints.up('lg'));
   const didInit = useRef(false);
-  useTitle('Course', data.title);
+
+  const {
+    tags,
+    meta,
+    title,
+    lessons,
+    duration,
+    launchDate,
+    description,
+    previewImageLink,
+  } = data;
+
+  useTitle('Course', title);
 
   const [playbackRate, setPlaybackRate] = useState<PlaybackRate>(1);
   const [tab, setTab] = useState<'content' | 'description'>('content');
   const [showPlaybackRate, setShowPlaybackRate] = useState(false);
-
-  const { tags, meta, title, lessons, duration, description } = data;
 
   useEffect(() => {
     const listener = (e: KeyboardEvent) => {
@@ -128,7 +138,7 @@ const Course = () => {
     }
   };
 
-  const selectedLesson = data.lessons.find(({ id }) => id === progress.active);
+  const selectedLesson = lessons.find(({ id }) => id === progress.active);
 
   return (
     <>
@@ -139,7 +149,7 @@ const Course = () => {
               playbackRate={playbackRate}
               showPlaybackRate={showPlaybackRate}
             >
-              <ReactPlayer
+              <Styles.Player
                 playing
                 controls
                 width="100%"
@@ -148,8 +158,7 @@ const Course = () => {
                 onReady={onReady}
                 url={selectedLesson.link}
                 playbackRate={playbackRate}
-                light={`${data.previewImageLink}/cover.webp`}
-                style={{ position: 'absolute', top: 0, left: 0 }}
+                light={getCoverUrl(previewImageLink)}
                 onProgress={(videoProgress) =>
                   setProgress((prev) => ({
                     ...prev,
@@ -159,20 +168,12 @@ const Course = () => {
               />
             </Styles.PlayerContainer>
           ) : (
-            <Flex
-              center
-              gap={3}
-              sx={{
-                p: 1,
-                width: '100%',
-                height: '600px',
-              }}
-            >
+            <Styles.ErrorContainer center gap={3}>
               <Error sx={{ width: '48px', height: '48px' }} />
               <Typography variant="h3">
                 Sorry, no video found for this lesson
               </Typography>
-            </Flex>
+            </Styles.ErrorContainer>
           )}
 
           <Flex column gap={2} sx={{ p: 2 }}>
@@ -201,7 +202,7 @@ const Course = () => {
                   <Typography>
                     Launched at{' '}
                     {data &&
-                      new Date(data.launchDate).toLocaleDateString('en-US', {
+                      new Date(launchDate).toLocaleDateString('en-US', {
                         month: 'long',
                         year: 'numeric',
                       })}

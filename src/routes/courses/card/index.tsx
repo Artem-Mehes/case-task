@@ -12,6 +12,7 @@ import {
 } from '@mui/material';
 
 import { Flex } from 'components';
+import { getCoverUrl } from 'utils';
 import { PreviewCourse } from 'api/courses';
 
 import * as Styles from './styles';
@@ -30,6 +31,12 @@ export const Card = ({ data }: { data: PreviewCourse }) => {
   const [hovered, setHovered] = useState(false);
 
   const {
+    id,
+    title,
+    rating,
+    description,
+    lessonsCount,
+    previewImageLink,
     meta: { courseVideoPreview },
   } = data;
 
@@ -37,8 +44,8 @@ export const Card = ({ data }: { data: PreviewCourse }) => {
 
   const skills =
     isMobile && !showAllSkills
-      ? data?.meta.skills?.slice(0, maxSkillsOnMobile)
-      : data?.meta.skills;
+      ? data.meta.skills?.slice(0, maxSkillsOnMobile)
+      : data.meta.skills;
 
   const onShowMoreSkillsClick: MouseEventHandler<HTMLDivElement> = (e) => {
     e.stopPropagation();
@@ -48,7 +55,7 @@ export const Card = ({ data }: { data: PreviewCourse }) => {
 
   return (
     <Styles.Card
-      onClick={() => navigate(data.id)}
+      onClick={() => navigate(id)}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
     >
@@ -77,27 +84,27 @@ export const Card = ({ data }: { data: PreviewCourse }) => {
         <CardMedia
           height="300"
           component="img"
-          title={data.title}
-          image={`${data.previewImageLink}/cover.webp`}
+          title={title}
+          image={getCoverUrl(previewImageLink)}
         />
       )}
 
       <Styles.CardContent>
         <Styles.CardTitleContainer>
-          <Typography variant="h5">{data.title}</Typography>
+          <Typography variant="h5">{title}</Typography>
 
           <Flex gap={1}>
             <Star sx={{ color: yellow[500] }} />
-            {data.rating}
+            {rating}
           </Flex>
         </Styles.CardTitleContainer>
         <Typography variant="body2" color="text.secondary">
-          {data.description}
+          {description}
         </Typography>
 
         <Flex gap={1}>
           <VideoLibrary />
-          {data.lessonsCount} lessons
+          {lessonsCount} lessons
         </Flex>
 
         <Flex gap={1} flexWrap="wrap">

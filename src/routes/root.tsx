@@ -1,9 +1,8 @@
+import { useMemo } from 'react';
 import '@fontsource/roboto/300.css';
 import '@fontsource/roboto/400.css';
 import '@fontsource/roboto/500.css';
 import '@fontsource/roboto/700.css';
-import { useMemo, useState } from 'react';
-import { Toaster } from 'react-hot-toast';
 import { useIsFetching, useQuery } from '@tanstack/react-query';
 import { LaptopMac, Brightness4, Brightness7 } from '@mui/icons-material';
 import {
@@ -17,29 +16,35 @@ import {
   Button,
   Toolbar,
   Divider,
+  Backdrop,
   Typography,
+  IconButton,
   createTheme,
   CssBaseline,
+  ButtonProps,
   GlobalStyles,
   useMediaQuery,
   ThemeProvider,
+  CircularProgress,
 } from '@mui/material';
 
-import { Loader } from 'icons';
 import { Flex } from 'components';
+import { getGlobalStyles } from 'utils';
+import { useLocalStorage } from 'hooks';
 
 import { courseQuery } from './course';
-import { getGlobalStyles } from './utils';
 
 const Root = () => {
   const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)');
+
   const location = useLocation();
   const { id } = useParams();
   const isFetching = useIsFetching();
   const { data } = useQuery(courseQuery(id));
   const navigation = useNavigation();
 
-  const [mode, setMode] = useState<'dark' | 'light'>(
+  const [mode, setMode] = useLocalStorage<'dark' | 'light'>(
+    'colorMode',
     prefersDarkMode ? 'dark' : 'light'
   );
 
@@ -53,17 +58,22 @@ const Root = () => {
     [mode]
   );
 
-  const globalStyles = useMemo(() => getGlobalStyles(theme), [theme]);
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   const toggleColorMode = () =>
     setMode((prev) => (prev === 'light' ? 'dark' : 'light'));
 
+  const toggleThemeProps: ButtonProps = {
+    sx: { ml: 'auto' },
+    color: 'inherit',
+    onClick: toggleColorMode,
+  };
+
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <GlobalStyles styles={globalStyles} />
-
-      <AppBar component="nav">
+      <GlobalStyles styles={getGlobalStyles} />
+      <AppBar component="header">
         <Toolbar sx={{ display: 'flex', gap: 4 }}>
           <Flex
             gap={1}
@@ -78,6 +88,7 @@ const Root = () => {
             <LaptopMac />
             <Typography
               variant="h6"
+              component="h1"
               sx={{
                 fontWeight: 700,
               }}
@@ -99,31 +110,43 @@ const Root = () => {
             </Typography>
           )}
 
-          <Button
-            color="inherit"
-            onClick={toggleColorMode}
-            sx={{ ml: 'auto' }}
-            startIcon={
-              theme.palette.mode === 'dark' ? <Brightness7 /> : <Brightness4 />
-            }
-          >
-            {mode} mode
-          </Button>
+          {isMobile ? (
+            <IconButton {...toggleThemeProps} aria-label="toggle color theme">
+              {theme.palette.mode === 'dark' ? (
+                <Brightness7 />
+              ) : (
+                <Brightness4 />
+              )}
+            </IconButton>
+          ) : (
+            <Button
+              {...toggleThemeProps}
+              startIcon={
+                theme.palette.mode === 'dark' ? (
+                  <Brightness7 />
+                ) : (
+                  <Brightness4 />
+                )
+              }
+            >
+              {mode === 'light' ? 'dark' : 'light'} mode
+            </Button>
+          )}
         </Toolbar>
       </AppBar>
 
-      {isFetching || navigation.state === 'loading' ? (
-        <Flex alignItems="center" sx={{ height: 'inherit' }}>
-          <Loader />
-        </Flex>
-      ) : (
-        <>
-          <Toolbar />
-          <Outlet />
-        </>
-      )}
+      <Toolbar />
 
-      <Toaster />
+      {isFetching || navigation.state === 'loading' ? (
+        <Backdrop
+          open
+          sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
+        >
+          <CircularProgress color="inherit" />
+        </Backdrop>
+      ) : (
+        <Outlet />
+      )}
     </ThemeProvider>
   );
 };

@@ -1,4 +1,7 @@
+import ReactPlayer from 'react-player';
 import { alpha, Box, styled } from '@mui/material';
+
+import { Flex } from 'components';
 
 import { PlaybackRate } from './types';
 
@@ -65,4 +68,16 @@ export const PlayerContainer = styled(Box, {
     padding: `${theme.spacing(1)} ${theme.spacing(2)}`,
     backgroundColor: alpha(theme.palette.background.default, 0.6),
   },
+}));
+
+export const Player = styled(ReactPlayer)({
+  top: 0,
+  left: 0,
+  position: 'absolute',
+});
+
+export const ErrorContainer = styled(Flex)(({ theme }) => ({
+  width: '100%',
+  height: '600px',
+  padding: theme.spacing(1),
 }));
