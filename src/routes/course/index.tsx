@@ -50,18 +50,21 @@ export const courseLoader =
   };
 
 const Course = () => {
+  const theme = useTheme();
+  const params = useParams();
+  const isLargeScreen = useMediaQuery(theme.breakpoints.up('lg'));
+
+  const playerRef = useRef<BaseReactPlayer<ReactPlayerProps> | null>(null);
+  const didInit = useRef(false);
+
   const initialData = useLoaderData() as Awaited<
     ReturnType<ReturnType<typeof courseLoader>>
   >;
-  const theme = useTheme();
-  const playerRef = useRef<BaseReactPlayer<ReactPlayerProps> | null>(null);
-  const params = useParams();
+
   const { data } = useQuery({
     ...courseQuery(params.id),
     initialData,
   });
-  const isLargeScreen = useMediaQuery(theme.breakpoints.up('lg'));
-  const didInit = useRef(false);
 
   const {
     tags,
@@ -174,7 +177,11 @@ const Course = () => {
                 url={selectedLesson.link}
                 playbackRate={playbackRate}
                 light={getCoverUrl(previewImageLink)}
-                onError={() => setVideoRequestError(true)}
+                onError={(error) => {
+                  if (error.type === 'error') {
+                    setVideoRequestError(true);
+                  }
+                }}
                 onProgress={(videoProgress) =>
                   setProgress((prev) => ({
                     ...prev,

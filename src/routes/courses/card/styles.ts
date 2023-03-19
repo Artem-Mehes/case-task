@@ -1,15 +1,4 @@
-import {
-  Box,
-  styled,
-  Card as MuiCard,
-  CardContent as MuiCardContent,
-} from '@mui/material';
-
-export const CardContent = styled(MuiCardContent)(({ theme }) => ({
-  display: 'flex',
-  gap: theme.spacing(2),
-  flexDirection: 'column',
-}));
+import { styled, Card as MuiCard } from '@mui/material';
 
 export const Card = styled(MuiCard)(({ theme }) => ({
   width: '100%',
@@ -23,17 +12,5 @@ export const Card = styled(MuiCard)(({ theme }) => ({
           ? theme.palette.grey['300']
           : theme.palette.grey['900'],
     },
-  },
-}));
-
-export const CardTitleContainer = styled(Box)(({ theme }) => ({
-  display: 'flex',
-  gap: theme.spacing(1),
-  flexDirection: 'column',
-  alignItems: 'flex-start',
-  justifyContent: 'space-between',
-  [theme.breakpoints.up('md')]: {
-    flexDirection: 'row',
-    gap: theme.spacing(3),
   },
 }));

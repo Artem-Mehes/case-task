@@ -23,19 +23,18 @@ export const coursesLoader =
 const itemsPerPage = 12;
 
 const Courses = () => {
+  useTitle('Courses');
   const initialData = useLoaderData() as Awaited<
     ReturnType<ReturnType<typeof coursesLoader>>
   >;
-
-  useTitle('Courses');
-
-  const [page, setPage] = useSearchParams('page', '1');
 
   const { data } = useQuery({
     ...coursesQuery,
     initialData,
     select: (queryData) => queryData.courses,
   });
+
+  const [page, setPage] = useSearchParams('page', '1');
 
   const onPageChange: PaginationProps['onChange'] = (e, value) => {
     setPage(String(value));

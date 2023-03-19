@@ -3,10 +3,9 @@ import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 import Root from 'routes/root';
+import ErrorPage from 'error-page';
 import Course, { courseLoader } from 'routes/course';
 import Courses, { coursesLoader } from 'routes/courses';
-
-import ErrorPage from './error-page';
 
 const queryClient = new QueryClient({
   defaultOptions: {

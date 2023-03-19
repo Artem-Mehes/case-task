@@ -13,9 +13,8 @@ apiInstance.interceptors.request.use(async (config) => {
     const response = await axios.get(
       `${BASE_URL}auth/anonymous?platform=subscriptions`
     );
-    if (response.data.token) {
-      config.headers.Authorization = `Bearer ${response.data.token}`;
-    }
+
+    config.headers.Authorization = `Bearer ${response.data.token}`;
   } catch (error) {
     throw new Error(
       `${error instanceof Error && `${error.message}: `}Error getting token`

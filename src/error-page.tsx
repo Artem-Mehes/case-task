@@ -1,6 +1,6 @@
 import * as React from 'react';
-import { Link, useRouteError } from 'react-router-dom';
-import { Button, GlobalStyles, Typography } from '@mui/material';
+import { useRouteError } from 'react-router-dom';
+import { GlobalStyles, Typography } from '@mui/material';
 
 import { Flex } from 'components';
 import { globalStyles } from 'config';
@@ -19,10 +19,6 @@ export default function ErrorPage() {
             <Typography color="error">{error.message}</Typography>
           )}
         </Flex>
-
-        <Button variant="contained" component={Link} to="/">
-          Go back to home
-        </Button>
       </Flex>
     </>
   );

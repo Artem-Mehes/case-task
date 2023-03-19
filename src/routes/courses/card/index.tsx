@@ -1,13 +1,15 @@
 import ReactPlayer from 'react-player';
 import { yellow } from '@mui/material/colors';
 import { useNavigate } from 'react-router-dom';
-import { Star, VideoLibrary } from '@mui/icons-material';
+import { VideoLibrary } from '@mui/icons-material';
 import { MouseEventHandler, useEffect, useState } from 'react';
 import {
   Chip,
+  Rating,
   useTheme,
   CardMedia,
   Typography,
+  CardContent,
   useMediaQuery,
 } from '@mui/material';
 
@@ -24,9 +26,6 @@ export const Card = ({ data }: { data: PreviewCourse }) => {
   const navigate = useNavigate();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const [hasVideoRequestError, setVideoRequestError] = useState(false);
-  const [showAllSkills, setShowAllSkills] = useState(!isMobile);
-
-  useEffect(() => setShowAllSkills(!isMobile), [isMobile]);
 
   const [hovered, setHovered] = useState(false);
 
@@ -37,15 +36,25 @@ export const Card = ({ data }: { data: PreviewCourse }) => {
     description,
     lessonsCount,
     previewImageLink,
-    meta: { courseVideoPreview },
+    meta: { courseVideoPreview, skills },
   } = data;
+
+  const [showAllSkills, setShowAllSkills] = useState(true);
+
+  useEffect(
+    () =>
+      setShowAllSkills(
+        !isMobile ||
+          !skills ||
+          Boolean(skills && skills.length <= maxSkillsOnMobile)
+      ),
+    [isMobile, skills]
+  );
 
   const videoIsOk = courseVideoPreview?.duration && !hasVideoRequestError;
 
-  const skills =
-    isMobile && !showAllSkills
-      ? data.meta.skills?.slice(0, maxSkillsOnMobile)
-      : data.meta.skills;
+  const resultSkills =
+    isMobile && !showAllSkills ? skills?.slice(0, maxSkillsOnMobile) : skills;
 
   const onShowMoreSkillsClick: MouseEventHandler<HTMLDivElement> = (e) => {
     e.stopPropagation();
@@ -89,18 +98,21 @@ export const Card = ({ data }: { data: PreviewCourse }) => {
         />
       )}
 
-      <Styles.CardContent>
-        <Styles.CardTitleContainer>
+      <Flex gap={2} column component={CardContent}>
+        <Flex column gap={1}>
           <Typography variant="h5">{title}</Typography>
+          <Typography variant="body2" color="text.secondary">
+            {description}
+          </Typography>
+        </Flex>
 
-          <Flex gap={1}>
-            <Star sx={{ color: yellow[500] }} />
+        <Flex gap={1} alignItems="center">
+          <Typography variant="body1" color={yellow['800']}>
             {rating}
-          </Flex>
-        </Styles.CardTitleContainer>
-        <Typography variant="body2" color="text.secondary">
-          {description}
-        </Typography>
+          </Typography>
+
+          <Rating defaultValue={rating} precision={0.5} readOnly />
+        </Flex>
 
         <Flex gap={1}>
           <VideoLibrary />
@@ -108,7 +120,7 @@ export const Card = ({ data }: { data: PreviewCourse }) => {
         </Flex>
 
         <Flex gap={1} flexWrap="wrap">
-          {skills?.map((skill, index) => (
+          {resultSkills?.map((skill, index) => (
             <Chip
               key={index}
               size="small"
@@ -117,7 +129,7 @@ export const Card = ({ data }: { data: PreviewCourse }) => {
             />
           ))}
 
-          {isMobile && !showAllSkills && (
+          {!showAllSkills && (
             <Chip
               label="..."
               size="small"
@@ -126,7 +138,7 @@ export const Card = ({ data }: { data: PreviewCourse }) => {
             />
           )}
         </Flex>
-      </Styles.CardContent>
+      </Flex>
     </Styles.Card>
   );
 };

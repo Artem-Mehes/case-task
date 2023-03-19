@@ -35,13 +35,13 @@ import { getGlobalStyles } from 'utils';
 import { courseQuery } from './course';
 
 const Root = () => {
+  const { id } = useParams();
+  const location = useLocation();
+  const isFetching = useIsFetching();
+  const navigation = useNavigation();
   const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)');
 
-  const location = useLocation();
-  const { id } = useParams();
-  const isFetching = useIsFetching();
   const { data } = useQuery(courseQuery(id));
-  const navigation = useNavigation();
 
   const [mode, setMode] = useLocalStorage<'dark' | 'light'>(
     'colorMode',
