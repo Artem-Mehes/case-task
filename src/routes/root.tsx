@@ -22,14 +22,12 @@ import {
   createTheme,
   CssBaseline,
   ButtonProps,
-  GlobalStyles,
   useMediaQuery,
   ThemeProvider,
   CircularProgress,
 } from '@mui/material';
 
 import { Flex } from 'components';
-import { getGlobalStyles } from 'utils';
 import { useLocalStorage } from 'hooks';
 
 import { courseQuery } from './course';
@@ -64,15 +62,14 @@ const Root = () => {
     setMode((prev) => (prev === 'light' ? 'dark' : 'light'));
 
   const toggleThemeProps: ButtonProps = {
-    sx: { ml: 'auto' },
     color: 'inherit',
+    sx: { ml: 'auto' },
     onClick: toggleColorMode,
   };
 
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <GlobalStyles styles={getGlobalStyles} />
       <AppBar component="header">
         <Toolbar sx={{ display: 'flex', gap: 4 }}>
           <Flex
@@ -105,13 +102,17 @@ const Root = () => {
           />
 
           {data && navigation.state !== 'loading' && (
-            <Typography noWrap variant="h6">
+            <Typography noWrap variant="h6" component="h2">
               {data.title}
             </Typography>
           )}
 
           {isMobile ? (
-            <IconButton {...toggleThemeProps} aria-label="toggle color theme">
+            <IconButton
+              {...toggleThemeProps}
+              aria-label="toggle color theme"
+              title="Switch between dark and light mode"
+            >
               {theme.palette.mode === 'dark' ? (
                 <Brightness7 />
               ) : (

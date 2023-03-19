@@ -6,11 +6,8 @@ export const apiInstance = axios.create({
   baseURL: BASE_URL,
 });
 
-apiInstance.interceptors.response.use((response) => {
-  return response.data;
-});
+apiInstance.interceptors.response.use((response) => response.data);
 
-// TODO: handle error
 apiInstance.interceptors.request.use(async (config) => {
   try {
     const response = await axios.get(
@@ -19,8 +16,10 @@ apiInstance.interceptors.request.use(async (config) => {
     if (response.data.token) {
       config.headers.Authorization = `Bearer ${response.data.token}`;
     }
-  } catch (e) {
-    console.error(e);
+  } catch (error) {
+    throw new Error(
+      `${error instanceof Error && `${error.message}: `}Error getting token`
+    );
   }
 
   return config;
