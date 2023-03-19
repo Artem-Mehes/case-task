@@ -2,7 +2,7 @@ import { Dispatch, SetStateAction, useEffect, useState } from 'react';
 
 export function useLocalStorage<T>(
   name: string,
-  initialState: Partial<T>
+  initialState: T
 ): [T, Dispatch<SetStateAction<T>>] {
   const [state, setState] = useState<T>(() => {
     const storageValue = localStorage.getItem(name);
