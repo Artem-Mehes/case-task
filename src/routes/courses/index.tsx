@@ -1,4 +1,3 @@
-import { useMemo } from 'react';
 import { useLoaderData } from 'react-router-dom';
 import { QueryClient, useQuery } from '@tanstack/react-query';
 import { Grid, Pagination, PaginationProps } from '@mui/material';
@@ -42,13 +41,9 @@ const Courses = () => {
   };
 
   const pageCount = Math.ceil(data.length / itemsPerPage);
-
-  const items = useMemo(() => {
-    const begin = (+page - 1) * itemsPerPage;
-    const end = begin + itemsPerPage;
-
-    return data.slice(begin, end);
-  }, [page, data]);
+  const begin = (+page - 1) * itemsPerPage;
+  const end = begin + itemsPerPage;
+  const items = data.slice(begin, end);
 
   return (
     <Styles.CoursesContainer maxWidth="xl">
