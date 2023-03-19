@@ -1,4 +1,4 @@
-import { getPlural, secondsToHm } from './utils';
+import { getCoverUrl, getPlural, secondsToHm } from './utils';
 
 test('plural of 1 minute to equal "minute" label', () => {
   expect(getPlural(1, 'minute')).toBe('minute');
@@ -24,4 +24,8 @@ test('secondsToHm of 240 seconds with "minutes" label to equal "4 minutes"', () 
   expect(secondsToHm(240, { label: { minutes: ' minutes' } })).toBe(
     '4 minutes'
   );
+});
+
+test('getCoverUrl of "testlink" to equal "testlink/cover.webp"', () => {
+  expect(getCoverUrl('testlink')).toBe('testlink/cover.webp');
 });

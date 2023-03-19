@@ -1,5 +1,7 @@
 import { Theme } from '@mui/material';
 
+import { globalStyles } from './config';
+
 export const getPlural = (number: number, label: string) =>
   number === 1 ? label : `${label}s`;
 
@@ -34,9 +36,7 @@ export const secondsToHm = (
 };
 
 export const getGlobalStyles = (theme: Theme) => ({
-  html: { height: '100%' },
-  body: { height: 'inherit', margin: 0 },
-  '#root': { height: 'inherit' },
+  ...globalStyles,
   '::-webkit-scrollbar': {
     width: '8px',
   },

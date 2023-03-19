@@ -14,7 +14,11 @@ import { secondsToHm } from 'utils';
 
 import { LessonsProps } from './types';
 
-export const Lessons = ({ lessons, progress, setProgress }: LessonsProps) => {
+export const Lessons = ({
+  lessons,
+  progress,
+  onSelectLesson,
+}: LessonsProps) => {
   return (
     <>
       <AppBar
@@ -37,12 +41,7 @@ export const Lessons = ({ lessons, progress, setProgress }: LessonsProps) => {
                 <ListItemButton
                   disabled={isLocked}
                   selected={progress.active === lesson.id}
-                  onClick={() =>
-                    setProgress((prev) => ({
-                      ...prev,
-                      active: lesson.id,
-                    }))
-                  }
+                  onClick={() => onSelectLesson(lesson.id)}
                 >
                   <ListItemText
                     secondary={secondsToHm(lesson.duration)}

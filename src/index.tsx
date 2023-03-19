@@ -1,10 +1,8 @@
 import ReactDOM from 'react-dom/client';
-import { GlobalStyles } from '@mui/material';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 import Root from 'routes/root';
-import { getGlobalStyles } from 'utils';
 import Course, { courseLoader } from 'routes/course';
 import Courses, { coursesLoader } from 'routes/courses';
 
@@ -45,7 +43,6 @@ const root = ReactDOM.createRoot(
 );
 root.render(
   <QueryClientProvider client={queryClient}>
-    <GlobalStyles styles={getGlobalStyles} />
     <RouterProvider router={router} />
   </QueryClientProvider>
 );

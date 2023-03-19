@@ -22,6 +22,7 @@ import {
   createTheme,
   CssBaseline,
   ButtonProps,
+  GlobalStyles,
   useMediaQuery,
   ThemeProvider,
   CircularProgress,
@@ -29,6 +30,7 @@ import {
 
 import { Flex } from 'components';
 import { useLocalStorage } from 'hooks';
+import { getGlobalStyles } from 'utils';
 
 import { courseQuery } from './course';
 
@@ -69,6 +71,7 @@ const Root = () => {
 
   return (
     <ThemeProvider theme={theme}>
+      <GlobalStyles styles={getGlobalStyles} />
       <CssBaseline />
       <AppBar component="header">
         <Toolbar sx={{ display: 'flex', gap: 4 }}>

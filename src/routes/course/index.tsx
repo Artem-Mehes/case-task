@@ -22,7 +22,12 @@ import { useLocalStorageById, useTitle } from 'hooks';
 
 import * as Styles from './styles';
 import { Lessons } from './lessons';
-import { PlaybackRate, PlaybackRateOptions, Progress } from './types';
+import {
+  Progress,
+  PlaybackRate,
+  OnSelectLesson,
+  PlaybackRateOptions,
+} from './types';
 
 export const courseQuery = (id: Params['id']) => ({
   enabled: Boolean(id),
@@ -74,6 +79,7 @@ const Course = () => {
   const [playbackRate, setPlaybackRate] = useState<PlaybackRate>(1);
   const [tab, setTab] = useState<'content' | 'description'>('content');
   const [showPlaybackRate, setShowPlaybackRate] = useState(false);
+  const [videoRequestError, setVideoRequestError] = useState(false);
 
   useEffect(() => {
     const listener = (e: KeyboardEvent) => {
@@ -136,6 +142,15 @@ const Course = () => {
     if (played && playerRef.current) {
       playerRef.current.seekTo(Number(played), 'seconds');
     }
+    setVideoRequestError(false);
+  };
+
+  const onSelectLesson: OnSelectLesson = (id) => {
+    setProgress((prev) => ({
+      ...prev,
+      active: id,
+    }));
+    setVideoRequestError(false);
   };
 
   const selectedLesson = lessons.find(({ id }) => id === progress.active);
@@ -144,7 +159,7 @@ const Course = () => {
     <>
       <Flex>
         <Styles.MainContent>
-          {selectedLesson?.link ? (
+          {selectedLesson?.link && !videoRequestError ? (
             <Styles.PlayerContainer
               playbackRate={playbackRate}
               showPlaybackRate={showPlaybackRate}
@@ -159,6 +174,7 @@ const Course = () => {
                 url={selectedLesson.link}
                 playbackRate={playbackRate}
                 light={getCoverUrl(previewImageLink)}
+                onError={() => setVideoRequestError(true)}
                 onProgress={(videoProgress) =>
                   setProgress((prev) => ({
                     ...prev,
@@ -274,7 +290,7 @@ const Course = () => {
               <Lessons
                 progress={progress}
                 lessons={sortedLessons}
-                setProgress={setProgress}
+                onSelectLesson={onSelectLesson}
               />
             )}
           </Flex>
@@ -284,7 +300,7 @@ const Course = () => {
           <Lessons
             progress={progress}
             lessons={sortedLessons}
-            setProgress={setProgress}
+            onSelectLesson={onSelectLesson}
           />
         </Styles.SidebarContainer>
       </Flex>
