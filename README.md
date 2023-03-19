@@ -15,3 +15,5 @@ To run the project:
 1. npm install
 2. npm start
 
+To run tests:
+- npm run test
